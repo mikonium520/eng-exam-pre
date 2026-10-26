@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>呈分試 Tenses 50 分滿分大冒險!</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        present: '#2563EB',
+                        continuous: '#059669',
+                        past: '#D97706',
+                        perfect: '#7C3AED',
+                        future: '#DB2777',
+                        hkred: '#DE2910',
+                        hkbg: '#FFFBEB'
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'Fredoka', 'sans-serif'],
+                        fredoka: ['Fredoka', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FFFDF5;
+            font-family: 'Noto Sans TC', sans-serif;
+            user-select: none;
+        }
+        .tense-tab-btn.active {
+            box-shadow: 0 6px 18px -2px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        .bounce-gentle {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .pulse-subtle {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FEF3C7;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F59E0B;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-amber-50/40 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 text-white shadow-xl sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchNav('cards')">
+                <div class="w-10 h-10 bg-white text-red-500 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-inner">
+                    🚀
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-wide font-fredoka drop-shadow">呈分試 Tenses 50分滿分大冒險!</h1>
+                    <p class="text-xs text-amber-100 font-semibold">HK Primary English Grammar Master (P4 - P6)</p>
+                </div>
+            </div>
+
+            <!-- Score & Sound Controller -->
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleAudio()" id="audio-btn" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full text-xs font-bold border border-white/30 flex items-center space-x-1">
+                    <i class="fa-solid fa-volume-high" id="audio-icon"></i>
+                    <span id="audio-text">音效: 開</span>
+                </button>
+
+                <div class="flex items-center space-x-2 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30 text-xs md:text-sm">
+                    <span class="font-bold flex items-center text-amber-200">
+                        ⭐ <span id="user-stars" class="ml-1 font-fredoka font-black text-lg">0</span>
+                    </span>
+                    <span class="text-white/40">|</span>
+                    <span class="font-bold text-white flex items-center">
+                        🏆 <span id="user-level" class="ml-1">Lv.1 捉鬼學徒</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="max-w-6xl mx-auto px-2 flex space-x-1 overflow-x-auto text-sm font-bold pb-2 pt-1 no-scrollbar">
+            <button id="nav-cards" onclick="switchNav('cards')" class="nav-btn px-4 py-2 rounded-2xl flex items-center space-x-2 bg-white text-red-600 shadow-md transition-all whitespace-nowrap">
+                <i class="fa-solid fa-map-location-dot"></i> <span>📚 視覺攻略圖鑑</span>
+            </button>
+            <button id="nav-quiz" onclick="switchNav('quiz')" class="nav-btn px-4 py-2 rounded-xl flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white transition-all whitespace-nowrap">
+                <i class="fa-solid fa-bolt"></i> <span>⚡ 捉鬼特攻隊 (分類測驗)</span>
+            </button>
+            <button id="nav-step" onclick="switchNav('step')" class="nav-btn px-4 py-2 rounded-xl flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white transition-all whitespace-nowrap">
+                <i class="fa-solid fa-shield-halved"></i> <span>🛡️ 保分三步曲導航</span>
+            </button>
+            <button id="nav-exam" onclick="switchNav('exam')" class="nav-btn px-4 py-2 rounded-xl flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white transition-all whitespace-nowrap">
+                <i class="fa-solid fa-file-pen"></i> <span>⚔️ 50分滿分大考場</span>
+            </button>
+            <button id="nav-verbs" onclick="switchNav('verbs')" class="nav-btn px-4 py-2 rounded-xl flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white transition-all whitespace-nowrap">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span>📖 不規則動詞寶庫</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Content Container -->
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- ================= SECTION 1: 📚 視覺攻略圖鑑 (Cheat Sheet Infographics) ================= -->
+        <section id="sec-cards" class="space-y-6">
+            <!-- Header Banner -->
+            <div class="bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
+                <div class="relative z-10">
+                    <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">HK Pre-S1 呈分試必勝神器</span>
+                    <h2 class="text-2xl md:text-3xl font-black mt-2 font-fredoka">五大核心時態 + 視覺化圖表</h2>
+                    <p class="text-amber-100 text-sm mt-1">圖像化解構「三單魔王」、「Do/Does 魔法橡皮擦」、「三文治口訣」及「時間雷達」！</p>
+                </div>
+                <div class="absolute right-4 -bottom-6 text-9xl opacity-20 select-none">💡</div>
+            </div>
+
+            <!-- Tense Selector Tabs -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                <button onclick="showTenseCard('p1')" id="tab-p1" class="tense-tab-btn active bg-blue-600 text-white p-3 rounded-2xl font-bold text-center shadow transition-all hover:scale-105 text-sm">
+                    1. Simple Present
+                </button>
+                <button onclick="showTenseCard('p2')" id="tab-p2" class="tense-tab-btn bg-white text-emerald-700 border-2 border-emerald-500 p-3 rounded-2xl font-bold text-center shadow transition-all hover:scale-105 text-sm">
+                    2. Present Cont.
+                </button>
+                <button onclick="showTenseCard('p3')" id="tab-p3" class="tense-tab-btn bg-white text-amber-700 border-2 border-amber-500 p-3 rounded-2xl font-bold text-center shadow transition-all hover:scale-105 text-sm">
+                    3. Simple Past
+                </button>
+                <button onclick="showTenseCard('p4')" id="tab-p4" class="tense-tab-btn bg-white text-purple-700 border-2 border-purple-500 p-3 rounded-2xl font-bold text-center shadow transition-all hover:scale-105 text-sm">
+                    4. Present Perfect
+                </button>
+                <button onclick="showTenseCard('p5')" id="tab-p5" class="tense-tab-btn bg-white text-pink-700 border-2 border-pink-500 p-3 rounded-2xl font-bold text-center shadow transition-all hover:scale-105 text-sm">
+                    5. Simple Future
+                </button>
+                <button onclick="showTenseCard('p6')" id="tab-p6" class="tense-tab-btn bg-white text-red-600 border-2 border-red-500 p-3 rounded-2xl font-bold text-center shadow transition-all hover:scale-105 text-sm">
+                    🚀 保分三步曲
+                </button>
+            </div>
+
+            <!-- Dynamic Card Display Container -->
+            <div id="tense-card-content" class="bg-white rounded-3xl p-6 shadow-xl border-4 border-blue-400 transition-all">
+                <!-- Content inserted via JS -->
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 2: ⚡ 捉鬼特攻隊 (Categorized Unit Quizzes) ================= -->
+        <section id="sec-quiz" class="hidden space-y-6">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase">Topic & Trap Trainer</span>
+                    <h2 class="text-2xl md:text-3xl font-black mt-1 font-fredoka">⚡ 捉鬼特攻隊 (主題與陷阱快問快答)</h2>
+                    <p class="text-blue-100 text-sm">選擇特定時態或考題陷阱進行針對性特訓！</p>
+                </div>
+                <!-- Filter Category -->
+                <div class="flex flex-wrap gap-1.5">
+                    <button onclick="filterQuizCategory('all')" id="qcat-all" class="qcat-btn bg-white text-blue-800 font-bold px-3 py-1.5 rounded-xl text-xs shadow">全部</button>
+                    <button onclick="filterQuizCategory('sp')" id="qcat-sp" class="qcat-btn bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1.5 rounded-xl text-xs">Simple Present</button>
+                    <button onclick="filterQuizCategory('pc')" id="qcat-pc" class="qcat-btn bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1.5 rounded-xl text-xs">Present Cont.</button>
+                    <button onclick="filterQuizCategory('past')" id="qcat-past" class="qcat-btn bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1.5 rounded-xl text-xs">Simple Past</button>
+                    <button onclick="filterQuizCategory('pp')" id="qcat-pp" class="qcat-btn bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1.5 rounded-xl text-xs">Present Perfect</button>
+                    <button onclick="filterQuizCategory('fut')" id="qcat-fut" class="qcat-btn bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1.5 rounded-xl text-xs">Simple Future</button>
+                </div>
+            </div>
+
+            <!-- Quiz Play Box -->
+            <div class="bg-white rounded-3xl p-6 shadow-xl border-2 border-indigo-200" id="unit-quiz-wrapper">
+                <!-- Content via JS -->
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 3: 🛡️ 保分三步曲導航 (Interactive Step-by-Step Trainer) ================= -->
+        <section id="sec-step" class="hidden space-y-6">
+            <div class="bg-gradient-to-r from-red-500 via-pink-500 to-orange-500 rounded-3xl p-6 text-white shadow-lg">
+                <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase">Three-Step Guarantee Wizard</span>
+                <h2 class="text-2xl md:text-3xl font-black mt-1 font-fredoka">🛡️ 保分三步曲導航特訓</h2>
+                <p class="text-amber-100 text-sm">一步步執行【1. 圈訊號詞】 ➡️ 【2. 檢查主語】 ➡️ 【3. 確定動詞/打回原形】解開難題！</p>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 shadow-xl border-2 border-red-200" id="step-trainer-wrapper">
+                <!-- Dynamic 3-step interactive wizard -->
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 4: ⚔️ 50分滿分大考場 (Mock Exam Mode) ================= -->
+        <section id="sec-exam" class="hidden space-y-6">
+            <div class="bg-gradient-to-r from-rose-600 to-red-600 rounded-3xl p-6 text-white shadow-lg flex justify-between items-center">
+                <div>
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase">HK Primary Mock Exam</span>
+                    <h2 class="text-2xl md:text-3xl font-black mt-1 font-fredoka">⚔️ 呈分試 50 分滿分大考場!</h2>
+                    <p class="text-rose-100 text-sm">包含填空題與【模擬找錯 Proofreading】，限時 5 分鐘！</p>
+                </div>
+                <div class="text-right hidden sm:block">
+                    <div id="exam-timer" class="text-3xl font-black font-fredoka bg-white/20 px-4 py-2 rounded-2xl border border-white/30">
+                        05:00
+                    </div>
+                </div>
+            </div>
+
+            <div id="exam-wrapper" class="bg-white rounded-3xl p-6 shadow-xl border-2 border-rose-200 min-h-[400px] flex flex-col justify-center items-center text-center">
+                <!-- Content rendered via JS -->
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 5: 📖 不規則動詞寶庫 (Irregular Verbs Visual Deck) ================= -->
+        <section id="sec-verbs" class="hidden space-y-6">
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-6 text-white shadow-lg">
+                <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase">Irregular Verbs Magic Vault</span>
+                <h2 class="text-2xl md:text-3xl font-black mt-1 font-fredoka">📖 不規則動詞魔法寶庫</h2>
+                <p class="text-purple-100 text-sm">支援真人發音朗讀 (Text-to-Speech) 與三態記憶分類卡！</p>
+
+                <!-- Search & Category Filters -->
+                <div class="mt-4 flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-grow">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-purple-300"></i>
+                        <input type="text" id="verb-search" oninput="filterVerbs()" placeholder="搜尋 Base Form / Past Simple / 中文..." class="w-full pl-11 pr-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/30 text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-amber-300">
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="setVerbCategory('all')" id="vcat-all" class="vcat-btn bg-white text-purple-700 px-3.5 py-2 rounded-2xl font-bold text-xs shadow">全部</button>
+                        <button onclick="setVerbCategory('same_all')" id="vcat-same_all" class="vcat-btn bg-white/20 hover:bg-white/30 text-white px-3.5 py-2 rounded-2xl font-bold text-xs">AAA 模式</button>
+                        <button onclick="setVerbCategory('past_pp_same')" id="vcat-past_pp_same" class="vcat-btn bg-white/20 hover:bg-white/30 text-white px-3.5 py-2 rounded-2xl font-bold text-xs">ABB 模式</button>
+                        <button onclick="setVerbCategory('diff_all')" id="vcat-diff_all" class="vcat-btn bg-white/20 hover:bg-white/30 text-white px-3.5 py-2 rounded-2xl font-bold text-xs">ABC 模式</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verbs Grid -->
+            <div id="verbs-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Dynamic cards -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-slate-300 py-6 text-center text-xs border-t border-slate-700 mt-12">
+        <div class="max-w-6xl mx-auto px-4 space-y-2">
+            <p class="font-bold text-slate-200">呈分試 Tenses 50 分滿分大冒險! • Designed for HK Primary P4-P6 Students</p>
+            <p class="text-slate-400">Simple Present • Present Continuous • Simple Past • Present Perfect • Simple Future • 3-Step Guarantee</p>
+        </div>
+    </footer>
+
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // AUDIO SYNTHESIS & SFX SYSTEM
+        let soundEnabled = true;
+
+        function playSFX(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(130, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.25);
+                }
+            } catch (e) {}
+        }
+
+        function speakWord(word) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('audio-text').innerText = soundEnabled ? "音效: 開" : "音效: 關";
+            document.getElementById('audio-icon').className = soundEnabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark";
+        }
+
+        // GLOBAL SCORE MANAGEMENT
+        let userScore = parseInt(localStorage.getItem('hk_tenses_stars') || '0');
+
+        function addStars(pts) {
+            userScore += pts;
+            localStorage.setItem('hk_tenses_stars', userScore);
+            updateHeaderStats();
+        }
+
+        function updateHeaderStats() {
+            document.getElementById('user-stars').innerText = userScore;
+            let level = Math.floor(userScore / 30) + 1;
+            let levelTitle = "捉鬼學徒";
+            if (level >= 6) levelTitle = "呈分試神將 👑";
+            else if (level >= 4) levelTitle = "時態大偵探 🕵️";
+            else if (level >= 2) levelTitle = "語法隊長 🛡️";
+
+            document.getElementById('user-level').innerText = `Lv.${level} ${levelTitle}`;
+        }
+
+
+        // --- DATA STRUCTURES ---
+
+        // TENSE CHEAT CARDS & INFOGRAPHICS
+        const tensesData = {
+            p1: {
+                title: "1. Simple Present Tense (一般現在式)",
+                badge: "習慣/事實魔王",
+                color: "blue",
+                borderColor: "border-blue-500",
+                headerBg: "bg-gradient-to-r from-blue-600 to-indigo-600",
+                summary: "用來表示【經常發生的習慣】或【客觀事實/真理】。",
+                signals: ["always (總是)", "usually (通常)", "often (經常)", "sometimes (有時)", "never (從不)", "every day / week", "on Mondays"],
+                formula: "主語 (I/You/We/They) + V(原形) <br> 主語 (He/She/It/單數) + V(s/es/ies)",
+                traps: [
+                    { title: "👹 三單大魔王", desc: "He / She / It / Tom (單數名詞) 必須加上 s / es / ies 或 has！例如：Tom brushes his teeth every morning." },
+                    { title: "🔍 隱形主語偵探", desc: "不可數名詞 = 單數 (Water boils at 100°C) <br> 動名詞 (V-ing) = 單數 (Reading helps us) <br> A and B = 複數 (Tom and Mary like ice cream) <br> A or B = 睇最近動詞嘅主語" }
+                ],
+                // INFOGRAPHIC HTML
+                diagram: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                        <!-- Diagram A: Do/Does Magic Eraser -->
+                        <div class="bg-blue-50/70 p-4 rounded-2xl border-2 border-blue-200">
+                            <h5 class="font-black text-blue-900 text-sm flex items-center">
+                                🪄 1. Do/Does 魔法橡皮擦 (打回原形 Diagram)
+                            </h5>
+                            <div class="mt-3 bg-white p-3 rounded-xl border border-blue-100 space-y-2 text-xs">
+                                <div class="flex items-center space-x-2 bg-rose-50 p-2 rounded-lg text-rose-800">
+                                    <span class="text-rose-600 font-black">❌</span>
+                                    <span>She doesn't <span class="line-through font-bold">plays</span> football.</span>
+                                </div>
+                                <div class="flex items-center space-x-2 bg-emerald-50 p-2 rounded-lg text-emerald-800">
+                                    <span class="text-emerald-600 font-black">✅</span>
+                                    <span>She doesn't <span class="font-black underline">play</span> football.</span>
+                                </div>
+                                <p class="text-[11px] text-blue-600 font-bold italic">💡 口訣：否定/疑問句見到 Do/Does/Don't/Doesn't，馬上用「魔法橡皮擦」擦走 s/es，打回原形！</p>
+                            </div>
+                        </div>
+
+                        <!-- Diagram B: Sandwich Rule -->
+                        <div class="bg-amber-50/80 p-4 rounded-2xl border-2 border-amber-200">
+                            <h5 class="font-black text-amber-900 text-sm flex items-center">
+                                🥪 2. 頻率副詞三文治 (Be 後動前)
+                            </h5>
+                            <div class="mt-3 space-y-1 text-center font-bold text-xs">
+                                <div class="bg-amber-200 text-amber-900 p-2 rounded-t-xl">🍞 面包頂：Be 動詞 (is / am / are)</div>
+                                <div class="bg-amber-400 text-white p-2 shadow-inner">🥓 餡料：頻率副詞 (always / usually / often / never)</div>
+                                <div class="bg-amber-200 text-amber-900 p-2 rounded-b-xl">🍞 面包底：一般動詞 (run / eat / go)</div>
+                                <p class="text-[11px] text-amber-800 font-bold mt-2">He <span class="text-red-600">is always</span> late. | He <span class="text-red-600">always gets</span> up early.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            p2: {
+                title: "2. Present Continuous Tense (現在進行式)",
+                badge: "此刻進行中",
+                color: "emerald",
+                borderColor: "border-emerald-500",
+                headerBg: "bg-gradient-to-r from-emerald-600 to-teal-600",
+                summary: "用來表示【此刻正在發生】或【現階段進行中】的事情。",
+                signals: ["now (現在)", "at the moment (此刻)", "right now", "Look!", "Listen!", "Keep quiet!", "these days", "this week"],
+                formula: "Subject + am / is / are + V-ing",
+                traps: [
+                    { title: "🔒 狀態動詞陷阱 (Stative Verbs)", desc: "情感(love, like), 思維(know, believe), 擁有(have, belong) 【通常不用進行式】！<br>❌ I am knowing the answer. ➡️ ✅ I know the answer." }
+                ],
+                diagram: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                        <!-- V-ing Machine Diagram -->
+                        <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-200">
+                            <h5 class="font-black text-emerald-900 text-sm">🤖 V-ing 變身機器人 (Spelling Rules)</h5>
+                            <div class="mt-2 space-y-1.5 text-xs text-emerald-900">
+                                <div class="bg-white p-2 rounded-xl border border-emerald-200 flex justify-between">
+                                    <span>• 直接加 ing</span>
+                                    <span class="font-bold">walk ➡️ walking</span>
+                                </div>
+                                <div class="bg-white p-2 rounded-xl border border-emerald-200 flex justify-between">
+                                    <span>• 去 e 加 ing (去 e 機!)</span>
+                                    <span class="font-bold text-red-600">make ➡️ making</span>
+                                </div>
+                                <div class="bg-white p-2 rounded-xl border border-emerald-200 flex justify-between">
+                                    <span>• CVC 重複字尾 (雙寫魔法)</span>
+                                    <span class="font-bold text-emerald-700">run ➡️ running</span>
+                                </div>
+                                <div class="bg-white p-2 rounded-xl border border-emerald-200 flex justify-between">
+                                    <span>• -ie 改 -y 加 ing</span>
+                                    <span class="font-bold text-purple-600">lie ➡️ lying</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Habit vs Now Comparison -->
+                        <div class="bg-teal-50 p-4 rounded-2xl border-2 border-teal-200">
+                            <h5 class="font-black text-teal-900 text-sm">⚔️ Habit (習慣) vs. Now (此刻)</h5>
+                            <div class="mt-3 space-y-2 text-xs">
+                                <div class="bg-white p-2.5 rounded-xl border border-teal-200">
+                                    <span class="text-teal-600 font-bold">日常習慣：</span> Every day, Tom <span class="font-bold text-blue-600">plays</span> football.
+                                </div>
+                                <div class="bg-white p-2.5 rounded-xl border border-teal-200">
+                                    <span class="text-teal-600 font-bold">此刻發生：</span> ...but <span class="bg-yellow-200 px-1 font-bold">NOW</span> he <span class="font-bold text-emerald-600">IS DOING</span> his homework.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            p3: {
+                title: "3. Simple Past Tense (一般過去式)",
+                badge: "滿分時光機",
+                color: "amber",
+                borderColor: "border-amber-500",
+                headerBg: "bg-gradient-to-r from-amber-500 to-orange-600",
+                summary: "用來表示【過去特定時間已經完成】的動作或狀態。",
+                signals: ["yesterday (昨天)", "last night / week / year", "... ago (3 days ago)", "in 2020", "just now (剛才)"],
+                formula: "Subject + Past Tense Verb (V-ed 或 不規則變化)",
+                traps: [
+                    { title: "🛡️ Did / Didn't 盾牌陷阱", desc: "Did 或 Didn't 出現時，動詞【必須打回原形】！<br>❌ Did you saw? ➡️ ✅ Did you see?" }
+                ],
+                diagram: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                        <!-- Past Be Throne -->
+                        <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-200">
+                            <h5 class="font-black text-amber-900 text-sm">👑 Be 動詞過去式雙王座</h5>
+                            <div class="grid grid-cols-2 gap-2 mt-2 text-center text-xs">
+                                <div class="bg-white p-3 rounded-xl border border-amber-300">
+                                    <span class="text-lg block font-black text-amber-600">WAS</span>
+                                    <span class="text-slate-600 font-bold">I, He, She, It, 單數</span>
+                                </div>
+                                <div class="bg-white p-3 rounded-xl border border-amber-300">
+                                    <span class="text-lg block font-black text-amber-600">WERE</span>
+                                    <span class="text-slate-600 font-bold">You, We, They, 複數</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Irregular Alchemy -->
+                        <div class="bg-orange-50 p-4 rounded-2xl border-2 border-orange-200">
+                            <h5 class="font-black text-orange-900 text-sm">🧪 必背不規則動詞變身</h5>
+                            <div class="mt-2 text-xs space-y-1 font-bold">
+                                <div class="flex justify-between bg-white p-2 rounded-lg border border-orange-200">
+                                    <span>buy 買</span> <span class="text-orange-600">➡️ bought</span>
+                                </div>
+                                <div class="flex justify-between bg-white p-2 rounded-lg border border-orange-200">
+                                    <span>go 去</span> <span class="text-orange-600">➡️ went</span>
+                                </div>
+                                <div class="flex justify-between bg-white p-2 rounded-lg border border-orange-200">
+                                    <span>eat 吃</span> <span class="text-orange-600">➡️ ate</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            p4: {
+                title: "4. Present Perfect Tense (現在完成式)",
+                badge: "經驗與影響雷達",
+                color: "purple",
+                borderColor: "border-purple-500",
+                headerBg: "bg-gradient-to-r from-purple-600 to-indigo-600",
+                summary: "表示【從過去持續到現在的動作】或【強調過去經驗/對現在的影響】。",
+                signals: ["since (+時間點)", "for (+一段時間)", "already (已經)", "just (剛剛)", "yet (未)", "ever / never", "so far"],
+                formula: "Subject + HAVE / HAS + P.P. (Past Participle)",
+                traps: [
+                    { title: "🏰 Have Been To vs. Have Gone To 迷宮", desc: "• Have been to: 去過【已回港】<br>• Have gone to: 去了【未回港】" }
+                ],
+                diagram: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                        <!-- Radar Signals -->
+                        <div class="bg-purple-50 p-4 rounded-2xl border-2 border-purple-200">
+                            <h5 class="font-black text-purple-900 text-sm">📡 Signal Words Radar</h5>
+                            <div class="mt-2 text-xs space-y-1.5">
+                                <div class="bg-white p-2 rounded-xl border border-purple-200 font-bold">
+                                    <span class="text-purple-600">SINCE</span> + 時間點 (e.g., since 2018 / 9 o'clock)
+                                </div>
+                                <div class="bg-white p-2 rounded-xl border border-purple-200 font-bold">
+                                    <span class="text-purple-600">FOR</span> + 一段時間 (e.g., for 3 years / 2 hours)
+                                </div>
+                                <div class="bg-white p-2 rounded-xl border border-purple-200 font-bold">
+                                    <span class="text-purple-600">YET</span> 放句尾 (否定句 / 疑問句)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Been vs Gone Maze -->
+                        <div class="bg-indigo-50 p-4 rounded-2xl border-2 border-indigo-200 text-xs">
+                            <h5 class="font-black text-indigo-900 text-sm mb-2">🏰 Been vs. Gone 迷宮</h5>
+                            <div class="space-y-2">
+                                <div class="bg-white p-2 rounded-xl border border-indigo-200">
+                                    <p class="font-black text-emerald-600">HAVE BEEN TO (人已回來)</p>
+                                    <p class="text-[11px] text-slate-600">I have been to Japan twice. (人現在在香港)</p>
+                                </div>
+                                <div class="bg-white p-2 rounded-xl border border-indigo-200">
+                                    <p class="font-black text-rose-600">HAVE GONE TO (人未回來)</p>
+                                    <p class="text-[11px] text-slate-600">He has gone to the library. (人不在這裡)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            p5: {
+                title: "5. Simple Future Tense (一般將來式)",
+                badge: "未來預知卡",
+                color: "pink",
+                borderColor: "border-pink-500",
+                headerBg: "bg-gradient-to-r from-pink-500 to-rose-600",
+                summary: "用來表示【將要發生的動作】或【預測/計劃】。",
+                signals: ["tomorrow (明天)", "next week / month", "in two days", "soon", "later", "tonight"],
+                formula: "Formula A: Will + V(原形) <br> Formula B: am / is / are + GOING TO + V(原形)",
+                traps: [
+                    { title: "⚡ Conditional Type 1 (If 條件句)", desc: "口訣：**If 現在，主將來！**" }
+                ],
+                diagram: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                        <!-- Will vs Be going to -->
+                        <div class="bg-pink-50 p-4 rounded-2xl border-2 border-pink-200 text-xs">
+                            <h5 class="font-black text-pink-900 text-sm mb-2">⚖️ Will vs. Be Going To</h5>
+                            <div class="space-y-1.5">
+                                <div class="bg-white p-2 rounded-xl border border-pink-200">
+                                    <span class="font-bold text-pink-600">WILL:</span> 臨時決定 / 預測 (I will help you!)
+                                </div>
+                                <div class="bg-white p-2 rounded-xl border border-pink-200">
+                                    <span class="font-bold text-purple-600">BE GOING TO:</span> 預先計劃 / 跡象預測 (Look at the black clouds! It is going to rain!)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- If Flowchart -->
+                        <div class="bg-rose-50 p-4 rounded-2xl border-2 border-rose-200 text-xs">
+                            <h5 class="font-black text-rose-900 text-sm mb-2">⚡ Conditional Type 1 (If 句型)</h5>
+                            <div class="bg-white p-3 rounded-xl border border-rose-200 text-center font-bold">
+                                <p class="text-rose-600">IF 子句 (Simple Present)</p>
+                                <p class="my-1">⬇️</p>
+                                <p class="text-indigo-600">主句 (Simple Future: Will + Base Verb)</p>
+                                <p class="text-[11px] text-slate-500 mt-2 font-normal">If it <span class="text-rose-600 font-bold">rains</span> tomorrow, the picnic <span class="text-indigo-600 font-bold">will be</span> cancelled.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            p6: {
+                title: "🚀 保分三步曲 (Three-Step Guarantee Strategy)",
+                badge: "呈分試必勝秘笈",
+                color: "red",
+                borderColor: "border-red-500",
+                headerBg: "bg-gradient-to-r from-red-600 via-pink-600 to-orange-500",
+                summary: "做任何英文時態題目時，嚴格執行【保分三步曲】流程圖！",
+                signals: ["Step 1: 圈訊號詞", "Step 2: 檢查主語", "Step 3: 否定/疑問句打回原形"],
+                formula: "訊號詞定位時態 ➡️ 主語決定單複數 ➡️ 否定/疑問句打回原形",
+                traps: [
+                    { title: "🎯 終極保分檢査清單", desc: "1. 圈訊號詞 2. 睇單複數 3. 睇有冇 did/didn't/does/will 打回原形！" }
+                ],
+                diagram: `
+                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-5 rounded-2xl border-2 border-orange-300 my-4 text-xs space-y-3">
+                        <h5 class="font-black text-amber-900 text-sm">🛡️ 保分三步曲 實戰示範流程</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 font-bold text-center">
+                            <div class="bg-white p-3 rounded-xl border border-orange-200">
+                                <span class="text-orange-600 block text-sm font-black">1. 圈訊號詞</span>
+                                <span class="text-slate-600">Circle Signal (e.g., yesterday)</span>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-orange-200">
+                                <span class="text-orange-600 block text-sm font-black">2. 檢查主語</span>
+                                <span class="text-slate-600">Check Subject (He/She/They)</span>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-orange-200">
+                                <span class="text-orange-600 block text-sm font-black">3. 動詞法則</span>
+                                <span class="text-slate-600">Base Verb / s / es / ed / ing</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        // IRREGULAR VERBS LIST
+        const irregularVerbs = [
+            { base: "be", past: "was / were", pp: "been", zh: "是 / 在", cat: "diff_all" },
+            { base: "begin", past: "began", pp: "begun", zh: "開始", cat: "diff_all" },
+            { base: "break", past: "broke", pp: "broken", zh: "打破", cat: "diff_all" },
+            { base: "bring", past: "brought", pp: "brought", zh: "帶來", cat: "past_pp_same" },
+            { base: "build", past: "built", pp: "built", zh: "建造", cat: "past_pp_same" },
+            { base: "buy", past: "bought", pp: "bought", zh: "購買", cat: "past_pp_same" },
+            { base: "catch", past: "caught", pp: "caught", zh: "捕捉", cat: "past_pp_same" },
+            { base: "choose", past: "chose", pp: "chosen", zh: "選擇", cat: "diff_all" },
+            { base: "come", past: "came", pp: "come", zh: "來", cat: "diff_all" },
+            { base: "cut", past: "cut", pp: "cut", zh: "切", cat: "same_all" },
+            { base: "do", past: "did", pp: "done", zh: "做", cat: "diff_all" },
+            { base: "draw", past: "drew", pp: "drawn", zh: "畫", cat: "diff_all" },
+            { base: "drink", past: "drank", pp: "drunk", zh: "飲", cat: "diff_all" },
+            { base: "eat", past: "ate", pp: "eaten", zh: "吃", cat: "diff_all" },
+            { base: "fly", past: "flew", pp: "flown", zh: "飛", cat: "diff_all" },
+            { base: "forget", past: "forgot", pp: "forgotten", zh: "忘記", cat: "diff_all" },
+            { base: "get", past: "got", pp: "got / gotten", zh: "得到", cat: "past_pp_same" },
+            { base: "give", past: "gave", pp: "given", zh: "給予", cat: "diff_all" },
+            { base: "go", past: "went", pp: "gone", zh: "去", cat: "diff_all" },
+            { base: "have", past: "had", pp: "had", zh: "有", cat: "past_pp_same" },
+            { base: "know", past: "knew", pp: "known", zh: "知道", cat: "diff_all" },
+            { base: "make", past: "made", pp: "made", zh: "製作", cat: "past_pp_same" },
+            { base: "read", past: "read", pp: "read", zh: "閱讀", cat: "same_all" },
+            { base: "run", past: "ran", pp: "run", zh: "跑步", cat: "diff_all" },
+            { base: "see", past: "saw", pp: "seen", zh: "看見", cat: "diff_all" },
+            { base: "sing", past: "sang", pp: "sung", zh: "唱歌", cat: "diff_all" },
+            { base: "swim", past: "swam", pp: "swum", zh: "游泳", cat: "diff_all" },
+            { base: "write", past: "wrote", pp: "written", zh: "書寫", cat: "diff_all" }
+        ];
+
+        // UNIT QUIZ QUESTIONS
+        const unitQuizQuestions = [
+            { cat: "sp", q: "Look! Water _____ (boil) at 100 degrees Celsius.", options: ["boils", "is boiling", "boiled", "will boil"], ans: "boils", explain: "客觀科學事實用 Simple Present，不可數名詞 Water 視作單數 (boils)！" },
+            { cat: "sp", q: "Does Tom _____ (like) eating dim sum?", options: ["likes", "like", "liked", "liking"], ans: "like", explain: "問句有了 Does，觸發魔法橡皮擦，動詞打回原形 (like)！" },
+            { cat: "pc", q: "Listen! The girl _____ (sing) a lovely song in the music room.", options: ["sings", "is singing", "sang", "has sung"], ans: "is singing", explain: "訊號詞 'Listen!' 表示此刻正在發生 ➡️ is singing！" },
+            { cat: "pc", q: "Look! The children _____ (run) across the street.", options: ["are runing", "are running", "runs", "is running"], ans: "are running", explain: "The children 係複數 (are)，run 屬於 CVC 重複字尾 ➡️ running (雙寫n)！" },
+            { cat: "past", q: "My mother _____ (buy) a new bag in Central yesterday.", options: ["buys", "bought", "has bought", "is buying"], ans: "bought", explain: "時間詞 'yesterday' 指特定過去，buy 不規則變身為 bought！" },
+            { cat: "past", q: "Did you _____ (finish) your homework last night?", options: ["finished", "finish", "finishes", "finishing"], ans: "finish", explain: "見到 Did 現身，動詞打回原形 (finish)！" },
+            { cat: "pp", q: "We _____ (live) in Shatin since 2015.", options: ["lived", "are living", "have lived", "has lived"], ans: "have lived", explain: "雷達接收到 'since 2015' ➡️ 用 Present Perfect (have lived)！" },
+            { cat: "pp", q: "Sarah is not here. She has _____ to the library.", options: ["been", "gone", "go", "went"], ans: "gone", explain: "「Sarah 不在這裡」代表去了未回來 ➡️ has gone to！" },
+            { cat: "fut", q: "If it rains tomorrow, the picnic _____ (be) cancelled.", options: ["is", "was", "will be", "would be"], ans: "will be", explain: "If 條件句口訣：If 現在，主將來 (will be)！" }
+        ];
+
+        // MOCK EXAM QUESTIONS
+        const mockExamQuestions = [
+            { type: "choice", q: "1. Tom usually _____ (walk) to school, but today he is taking the bus.", options: ["walks", "is walking", "walked", "has walked"], ans: "walks", explain: "usually 表示習慣 + 主語三單 (Tom) ➡️ walks" },
+            { type: "choice", q: "2. Did you _____ (see) the drone light show at Victoria Harbour last night?", options: ["saw", "seen", "see", "seeing"], ans: "see", explain: "Did 出現，動詞打回原形 (see)！" },
+            { type: "choice", q: "3. They have already _____ (be) to Disneyland three times.", options: ["were", "was", "been", "gone"], ans: "been", explain: "去過且已回來用 have been to。" },
+            { type: "choice", q: "4. Keep quiet! The baby _____ (sleep) in the room.", options: ["is sleeping", "sleeps", "slept", "has slept"], ans: "is sleeping", explain: "Keep quiet! 提示此刻正在發生。" },
+            { type: "choice", q: "5. Look at the dark clouds! It _____ (rain) soon.", options: ["will rain", "is going to rain", "rained", "rains"], ans: "is going to rain", explain: "有烏雲跡象的預測 ➡️ is going to rain。" },
+            { type: "error", q: "6. 模擬找錯 (Proofreading): 'My sister doesn't likes swimming in winter.'", options: ["likes ➡️ like", "doesn't ➡️ don't", "swimming ➡️ swim", "winter ➡️ winters"], ans: "likes ➡️ like", explain: "doesn't 後面必須用原形動詞 like！" },
+            { type: "error", q: "7. 模擬找錯 (Proofreading): 'We was very happy during the school trip yesterday.'", options: ["was ➡️ were", "happy ➡️ happily", "during ➡️ at", "yesterday ➡️ tomorrow"], ans: "was ➡️ were", explain: "主語 We 係複數，Past 'Be' 必須用 were！" },
+            { type: "choice", q: "8. Up to now, Mr. Wong _____ (teach) English for ten years.", options: ["teaches", "taught", "has taught", "is teaching"], ans: "has taught", explain: "Up to now / for ten years 提示 Present Perfect ➡️ has taught。" },
+            { type: "choice", q: "9. If Tom studies hard, he _____ (pass) the 呈分試 exam.", options: ["passes", "passed", "will pass", "has passed"], ans: "will pass", explain: "If 現在，主將來 (will pass)！" },
+            { type: "choice", q: "10. Neither Mary nor her brothers _____ (like) watching horror movies.", options: ["like", "likes", "liked", "are liking"], ans: "like", explain: "Neither A nor B 睇最近的主語 (her brothers = 複數) ➡️ like。" }
+        ];
+
+        // --- STATE VARIABLES ---
+        let currentQuizFilter = 'all';
+        let currentQuizIdx = 0;
+        let activeQuizList = [];
+
+        let currentStepQuestionIdx = 0;
+        let stepUserChoices = { signal: '', subject: '', verb: '' };
+
+        let examUserAnswers = [];
+        let examTimerInterval = null;
+        let examSecondsLeft = 300;
+
+        let currentVerbCat = 'all';
+
+        // ON LOAD INITIALIZATION
+        window.onload = function() {
+            showTenseCard('p1');
+            filterQuizCategory('all');
+            loadStepQuestion(0);
+            renderVerbs();
+            updateHeaderStats();
+        };
+
+        // NAVIGATION CONTROLLER
+        function switchNav(target) {
+            const sections = ['cards', 'quiz', 'step', 'exam', 'verbs'];
+            sections.forEach(sec => {
+                document.getElementById(`sec-${sec}`).classList.add('hidden');
+                document.getElementById(`nav-${sec}`).className = "nav-btn px-4 py-2 rounded-xl flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white transition-all whitespace-nowrap";
+            });
+
+            document.getElementById(`sec-${target}`).classList.remove('hidden');
+            document.getElementById(`nav-${target}`).className = "nav-btn px-4 py-2 rounded-2xl flex items-center space-x-2 bg-white text-red-600 shadow-md transition-all whitespace-nowrap font-bold";
+
+            if (target === 'exam' && examUserAnswers.length === 0) {
+                renderExamIntro();
+            }
+        }
+
+        // --- SECTION 1: CHEAT SHEET CARDS ---
+        function showTenseCard(key) {
+            const data = tensesData[key];
+            const container = document.getElementById('tense-card-content');
+
+            Object.keys(tensesData).forEach(k => {
+                const btn = document.getElementById(`tab-${k}`);
+                if (k === key) {
+                    btn.className = `tense-tab-btn active bg-${data.color}-600 text-white p-3 rounded-2xl font-bold text-center shadow transition-all hover:scale-105 text-sm`;
+                } else {
+                    btn.className = `tense-tab-btn bg-white text-slate-700 border border-slate-200 p-3 rounded-2xl font-bold text-center shadow transition-all hover:scale-105 text-sm`;
+                }
+            });
+
+            container.className = `bg-white rounded-3xl p-6 shadow-xl border-4 ${data.borderColor} transition-all`;
+
+            let html = `
+                <div class="space-y-6">
+                    <div class="${data.headerBg} p-5 rounded-2xl text-white flex justify-between items-center shadow">
+                        <div>
+                            <span class="bg-white/20 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wide">${data.badge}</span>
+                            <h3 class="text-2xl font-black mt-1 font-fredoka">${data.title}</h3>
+                            <p class="text-sm opacity-90 mt-0.5">${data.summary}</p>
+                        </div>
+                        <div class="text-5xl hidden sm:block">💡</div>
+                    </div>
+
+                    <!-- Visual Diagram Insert -->
+                    ${data.diagram}
+
+                    <!-- Formula & Signals Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <h4 class="font-bold text-slate-700 flex items-center text-sm">
+                                <i class="fa-solid fa-square-root-variable text-${data.color}-500 mr-2"></i> 核心公式 (Formula)
+                            </h4>
+                            <p class="text-sm font-semibold text-slate-800 mt-2 bg-white p-3 rounded-xl border border-slate-200">${data.formula}</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <h4 class="font-bold text-slate-700 flex items-center text-sm">
+                                <i class="fa-solid fa-tower-broadcast text-${data.color}-500 mr-2"></i> 關鍵訊號詞 Radar
+                            </h4>
+                            <div class="flex flex-wrap gap-1.5 mt-2">
+                                ${data.signals.map(s => `<span class="bg-${data.color}-100 text-${data.color}-800 text-xs font-bold px-2.5 py-1 rounded-lg border border-${data.color}-200">${s}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Traps List -->
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-base mb-3 flex items-center">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i> 呈分試常考陷阱小怪獸 Alert
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            ${data.traps.map(t => `
+                                <div class="bg-amber-50/70 p-4 rounded-2xl border border-amber-200 hover:shadow-md transition">
+                                    <h5 class="font-bold text-amber-900 text-sm mb-1">${t.title}</h5>
+                                    <p class="text-xs text-amber-800 leading-relaxed">${t.desc}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+
+        // --- SECTION 2: CATEGORIZED QUIZ CONTROLLER ---
+        function filterQuizCategory(cat) {
+            currentQuizFilter = cat;
+            document.querySelectorAll('.qcat-btn').forEach(b => {
+                b.className = "qcat-btn bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1.5 rounded-xl text-xs";
+            });
+            document.getElementById(`qcat-${cat}`).className = "qcat-btn bg-white text-blue-800 font-bold px-3 py-1.5 rounded-xl text-xs shadow";
+
+            if (cat === 'all') {
+                activeQuizList = [...unitQuizQuestions];
+            } else {
+                activeQuizList = unitQuizQuestions.filter(q => q.cat === cat);
+            }
+
+            currentQuizIdx = 0;
+            renderQuizCard();
+        }
+
+        function renderQuizCard() {
+            const wrapper = document.getElementById('unit-quiz-wrapper');
+            if (activeQuizList.length === 0) {
+                wrapper.innerHTML = `<p class="text-center text-slate-400 py-8 font-bold">此分類暫無題目。</p>`;
+                return;
+            }
+
+            const q = activeQuizList[currentQuizIdx];
+            wrapper.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center text-xs font-bold text-slate-500">
+                        <span>進度：${currentQuizIdx + 1} / ${activeQuizList.length}</span>
+                        <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full uppercase">Targeted Quiz</span>
+                    </div>
+
+                    <div class="bg-indigo-50/70 p-6 rounded-2xl border-2 border-indigo-200 text-center">
+                        <h3 class="text-xl md:text-2xl font-bold text-slate-800 font-fredoka">${q.q}</h3>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        ${q.options.map(opt => `
+                            <button onclick="checkUnitAnswer('${opt}', '${q.ans}')" class="p-3.5 bg-white border-2 border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 rounded-2xl font-bold text-slate-800 text-center transition">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <div id="quiz-feedback" class="hidden p-4 rounded-2xl"></div>
+                </div>
+            `;
+        }
+
+        function checkUnitAnswer(selected, correct) {
+            const q = activeQuizList[currentQuizIdx];
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.classList.remove('hidden', 'bg-emerald-100', 'bg-rose-100', 'text-emerald-900', 'text-rose-900');
+
+            if (selected === correct) {
+                playSFX('correct');
+                addStars(5);
+                confetti({ particleCount: 25, spread: 50, origin: { y: 0.7 } });
+
+                feedbackEl.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-300');
+                feedbackEl.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <span class="text-2xl">🎉</span>
+                        <div>
+                            <p class="font-black text-sm">答對了！(+5 ⭐️)</p>
+                            <p class="text-xs mt-1">💡 解析：${q.explain}</p>
+                            <button onclick="nextUnitQuiz()" class="mt-2 px-4 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow">下一題 ➡️</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                playSFX('wrong');
+                feedbackEl.classList.add('bg-rose-100', 'text-rose-900', 'border', 'border-rose-300');
+                feedbackEl.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <span class="text-2xl">👹</span>
+                        <div>
+                            <p class="font-black text-sm">踩中陷阱！正確答案是：<span class="underline font-bold">${correct}</span></p>
+                            <p class="text-xs mt-1">💡 解析：${q.explain}</p>
+                            <button onclick="nextUnitQuiz()" class="mt-2 px-4 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-bold shadow">繼續挑戰 ➡️</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function nextUnitQuiz() {
+            currentQuizIdx = (currentQuizIdx + 1) % activeQuizList.length;
+            renderQuizCard();
+        }
+
+
+        // --- SECTION 3: 🛡️ 保分三步曲 INTERACTIVE TRAINER ---
+        const stepTrainerData = [
+            {
+                q: "Listen! The baby __________ (cry) in the room.",
+                signals: ["Listen!", "cry", "in the room"],
+                correctSignal: "Listen!",
+                subjects: ["The baby (Singular)", "The baby (Plural)"],
+                correctSubject: "The baby (Singular)",
+                verbRules: ["am/is/are + V-ing (is crying)", "V-s/es (cries)", "V-ed (cried)"],
+                correctVerbRule: "am/is/are + V-ing (is crying)"
+            },
+            {
+                q: "Did you __________ (see) the rainbow yesterday morning?",
+                signals: ["Did & yesterday morning", "rainbow", "morning"],
+                correctSignal: "Did & yesterday morning",
+                subjects: ["you", "see"],
+                correctSubject: "you",
+                verbRules: ["打回原形 Base Verb (see)", "Past Tense (saw)", "P.P. (seen)"],
+                correctVerbRule: "打回原形 Base Verb (see)"
+            }
+        ];
+
+        function loadStepQuestion(idx) {
+            currentStepQuestionIdx = idx;
+            stepUserChoices = { signal: '', subject: '', verb: '' };
+            const item = stepTrainerData[idx];
+            const container = document.getElementById('step-trainer-wrapper');
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-red-50 p-5 rounded-2xl border-2 border-red-200 text-center">
+                        <span class="text-xs font-black text-red-600 uppercase bg-red-100 px-3 py-1 rounded-full">保分三步曲導航導師</span>
+                        <h3 class="text-xl md:text-2xl font-bold text-slate-800 font-fredoka mt-2">${item.q}</h3>
+                    </div>
+
+                    <!-- Step 1: Signal Word -->
+                    <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 space-y-2">
+                        <span class="font-black text-amber-900 text-sm">STEP 1: 第一步 - 圈出關鍵訊號詞 (Circle Signal)</span>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            ${item.signals.map(s => `
+                                <button onclick="selectStepChoice('signal', '${s}')" id="s1-${s}" class="px-3.5 py-2 bg-white border border-amber-300 rounded-xl font-bold text-xs hover:bg-amber-100 transition">
+                                    ${s}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Subject -->
+                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-200 space-y-2">
+                        <span class="font-black text-blue-900 text-sm">STEP 2: 第二步 - 檢查主語單複數 (Check Subject)</span>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            ${item.subjects.map(sub => `
+                                <button onclick="selectStepChoice('subject', '${sub}')" id="s2-${sub}" class="px-3.5 py-2 bg-white border border-blue-300 rounded-xl font-bold text-xs hover:bg-blue-100 transition">
+                                    ${sub}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Verb Form -->
+                    <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200 space-y-2">
+                        <span class="font-black text-purple-900 text-sm">STEP 3: 第三步 - 確定動詞規則 (Check Verb Rules)</span>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            ${item.verbRules.map(vr => `
+                                <button onclick="selectStepChoice('verb', '${vr}')" id="s3-${vr}" class="px-3.5 py-2 bg-white border border-purple-300 rounded-xl font-bold text-xs hover:bg-purple-100 transition">
+                                    ${vr}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <button onclick="checkStepTrainerResult()" class="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-black rounded-2xl shadow transition">
+                        🛡️ 驗證【保分三步曲】答案
+                    </button>
+
+                    <div id="step-feedback" class="hidden p-4 rounded-2xl"></div>
+                </div>
+            `;
+        }
+
+        function selectStepChoice(type, val) {
+            stepUserChoices[type] = val;
+            const item = stepTrainerData[currentStepQuestionIdx];
+
+            if (type === 'signal') {
+                item.signals.forEach(s => {
+                    const btn = document.getElementById(`s1-${s}`);
+                    if (btn) btn.className = s === val ? "px-3.5 py-2 bg-amber-500 text-white border border-amber-600 rounded-xl font-bold text-xs shadow" : "px-3.5 py-2 bg-white border border-amber-300 rounded-xl font-bold text-xs hover:bg-amber-100";
+                });
+            } else if (type === 'subject') {
+                item.subjects.forEach(s => {
+                    const btn = document.getElementById(`s2-${s}`);
+                    if (btn) btn.className = s === val ? "px-3.5 py-2 bg-blue-600 text-white border border-blue-700 rounded-xl font-bold text-xs shadow" : "px-3.5 py-2 bg-white border border-blue-300 rounded-xl font-bold text-xs hover:bg-blue-100";
+                });
+            } else if (type === 'verb') {
+                item.verbRules.forEach(s => {
+                    const btn = document.getElementById(`s3-${s}`);
+                    if (btn) btn.className = s === val ? "px-3.5 py-2 bg-purple-600 text-white border border-purple-700 rounded-xl font-bold text-xs shadow" : "px-3.5 py-2 bg-white border border-purple-300 rounded-xl font-bold text-xs hover:bg-purple-100";
+                });
+            }
+        }
+
+        function checkStepTrainerResult() {
+            const item = stepTrainerData[currentStepQuestionIdx];
+            const feedbackEl = document.getElementById('step-feedback');
+            feedbackEl.classList.remove('hidden', 'bg-emerald-100', 'bg-rose-100');
+
+            const isSignalCorrect = stepUserChoices.signal === item.correctSignal;
+            const isSubjectCorrect = stepUserChoices.subject === item.correctSubject;
+            const isVerbCorrect = stepUserChoices.verb === item.correctVerbRule;
+
+            if (isSignalCorrect && isSubjectCorrect && isVerbCorrect) {
+                playSFX('correct');
+                addStars(10);
+                confetti({ particleCount: 35, spread: 60, origin: { y: 0.7 } });
+
+                feedbackEl.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-300');
+                feedbackEl.innerHTML = `
+                    <p class="font-black text-sm">🎉 完美解題！成功遵循保分三步曲！(+10 ⭐️)</p>
+                    <button onclick="loadStepQuestion(${(currentStepQuestionIdx + 1) % stepTrainerData.length})" class="mt-2 px-4 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow">下一題 ➡️</button>
+                `;
+            } else {
+                playSFX('wrong');
+                feedbackEl.classList.add('bg-rose-100', 'text-rose-900', 'border', 'border-rose-300');
+                feedbackEl.innerHTML = `
+                    <p class="font-black text-sm">⚠️ 未完全正確，請再檢查一次三步曲選擇！</p>
+                `;
+            }
+        }
+
+
+        // --- SECTION 4: ⚔️ MOCK EXAM CONTROLLER ---
+        function renderExamIntro() {
+            const wrapper = document.getElementById('exam-wrapper');
+            wrapper.innerHTML = `
+                <div class="max-w-md space-y-4">
+                    <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-3xl flex items-center justify-center text-3xl font-black mx-auto">
+                        📝
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-800 font-fredoka">呈分試 50分滿分大考場</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        包含選擇題與【模擬找錯 Proofreading】，限時 5 分鐘！考驗你的實戰分析力！
+                    </p>
+                    <button onclick="startExam()" class="w-full py-3.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5">
+                        🚀 開始呈分大挑戰！
+                    </button>
+                </div>
+            `;
+        }
+
+        function startExam() {
+            examUserAnswers = new Array(mockExamQuestions.length).fill(null);
+            examSecondsLeft = 300;
+
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            examTimerInterval = setInterval(() => {
+                examSecondsLeft--;
+                let m = Math.floor(examSecondsLeft / 60).toString().padStart(2, '0');
+                let s = (examSecondsLeft % 60).toString().padStart(2, '0');
+                document.getElementById('exam-timer').innerText = `${m}:${s}`;
+
+                if (examSecondsLeft <= 0) {
+                    clearInterval(examTimerInterval);
+                    submitExam();
+                }
+            }, 1000);
+
+            renderExamQuestions();
+        }
+
+        function renderExamQuestions() {
+            const wrapper = document.getElementById('exam-wrapper');
+            wrapper.className = "bg-white rounded-3xl p-6 shadow-xl border-2 border-rose-200 text-left";
+
+            let html = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <h3 class="font-black text-slate-800 text-base">呈分試全真答題卷 (共 10 題)</h3>
+                        <span class="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded-full">每題 5 分</span>
+                    </div>
+
+                    <div class="space-y-5">
+                        ${mockExamQuestions.map((q, qIdx) => `
+                            <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200">
+                                <p class="font-bold text-slate-800 text-sm md:text-base">${q.q}</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+                                    ${q.options.map(opt => `
+                                        <button onclick="selectExamOption(${qIdx}, '${opt}')" id="exam-opt-${qIdx}-${opt}" class="p-2.5 rounded-xl border text-xs font-bold transition text-center ${examUserAnswers[qIdx] === opt ? 'bg-rose-500 text-white border-rose-600 shadow' : 'bg-white text-slate-700 border-slate-200 hover:bg-rose-50'}">
+                                            ${opt}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="pt-4 border-t flex justify-end">
+                        <button onclick="submitExam()" class="px-8 py-3 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-2xl shadow-lg transition">
+                            提交答卷 (Submit Paper)
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            wrapper.innerHTML = html;
+        }
+
+        function selectExamOption(qIdx, opt) {
+            examUserAnswers[qIdx] = opt;
+            mockExamQuestions[qIdx].options.forEach(o => {
+                const btn = document.getElementById(`exam-opt-${qIdx}-${o}`);
+                if (btn) {
+                    btn.className = o === opt ? "p-2.5 rounded-xl border text-xs font-bold transition text-center bg-rose-500 text-white border-rose-600 shadow" : "p-2.5 rounded-xl border text-xs font-bold transition text-center bg-white text-slate-700 border-slate-200 hover:bg-rose-50";
+                }
+            });
+        }
+
+        function submitExam() {
+            if (examTimerInterval) clearInterval(examTimerInterval);
+
+            let score = 0;
+            mockExamQuestions.forEach((q, idx) => {
+                if (examUserAnswers[idx] === q.ans) score += 5;
+            });
+
+            addStars(score);
+
+            if (score >= 40) {
+                playSFX('correct');
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+
+            let badgeTitle = score === 50 ? "🏆 Level 5** 呈分試狀元" : score >= 40 ? "🏅 Grade A 精英學生" : "📖 Grade B 潛力股";
+
+            const wrapper = document.getElementById('exam-wrapper');
+            wrapper.className = "bg-white rounded-3xl p-6 shadow-xl border-2 border-rose-200 text-left";
+
+            wrapper.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 p-6 rounded-3xl text-white text-center shadow-lg">
+                        <span class="text-xs uppercase font-black bg-white/20 px-3 py-1 rounded-full">Report Card 成績單</span>
+                        <div class="text-6xl font-black font-fredoka mt-2">${score} <span class="text-2xl">/ 50分</span></div>
+                        <div class="text-lg font-bold mt-1">${badgeTitle}</div>
+                    </div>
+
+                    <div class="space-y-3">
+                        ${mockExamQuestions.map((q, idx) => {
+                            const isCorrect = examUserAnswers[idx] === q.ans;
+                            return `
+                                <div class="p-3.5 rounded-2xl border ${isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}">
+                                    <div class="flex justify-between items-center text-xs font-bold mb-1">
+                                        <span>第 ${idx + 1} 題</span>
+                                        <span class="${isCorrect ? 'text-emerald-700' : 'text-rose-700'}">${isCorrect ? '✓ 答對 (+5分)' : '✗ 答錯'}</span>
+                                    </div>
+                                    <p class="text-sm font-bold text-slate-800">${q.q}</p>
+                                    <p class="text-xs text-slate-500 mt-1 italic">💡 點解：${q.explain}</p>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <div class="flex justify-center pt-4 border-t">
+                        <button onclick="renderExamIntro()" class="px-6 py-2.5 bg-slate-800 text-white font-bold rounded-xl text-sm shadow">
+                            🔄 再挑戰一次
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        // --- SECTION 5: IRREGULAR VERBS CONTROLLER ---
+        function setVerbCategory(cat) {
+            currentVerbCat = cat;
+            document.querySelectorAll('.vcat-btn').forEach(b => {
+                b.className = "vcat-btn bg-white/20 hover:bg-white/30 text-white px-3.5 py-2 rounded-2xl font-bold text-xs";
+            });
+            document.getElementById(`vcat-${cat}`).className = "vcat-btn bg-white text-purple-700 px-3.5 py-2 rounded-2xl font-bold text-xs shadow";
+            filterVerbs();
+        }
+
+        function filterVerbs() {
+            const query = document.getElementById('verb-search').value.toLowerCase().trim();
+            const filtered = irregularVerbs.filter(v => {
+                const matchesCat = currentVerbCat === 'all' || v.cat === currentVerbCat;
+                const matchesQuery = v.base.toLowerCase().includes(query) || v.past.toLowerCase().includes(query) || v.pp.toLowerCase().includes(query) || v.zh.includes(query);
+                return matchesCat && matchesQuery;
+            });
+
+            renderVerbsGrid(filtered);
+        }
+
+        function renderVerbs() {
+            filterVerbs();
+        }
+
+        function renderVerbsGrid(list) {
+            const grid = document.getElementById('verbs-grid');
+            if (list.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-bold">未找到相關不規則動詞。</div>`;
+                return;
+            }
+
+            grid.innerHTML = list.map(v => `
+                <div class="bg-white rounded-2xl p-4 shadow-md border border-purple-100 hover:border-purple-300 transition">
+                    <div class="flex justify-between items-start border-b pb-2 mb-2">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h4 class="text-xl font-black text-purple-900 font-fredoka">${v.base}</h4>
+                                <button onclick="speakWord('${v.base}')" class="text-purple-500 hover:text-purple-700 text-xs">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                </button>
+                            </div>
+                            <span class="text-[10px] text-purple-400 font-bold uppercase">Base Form</span>
+                        </div>
+                        <span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded-lg">${v.zh}</span>
+                    </div>
+
+                    <div class="space-y-1 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-bold">Past Simple:</span>
+                            <span class="font-bold text-amber-600">${v.past}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-bold">Past Participle:</span>
+                            <span class="font-bold text-indigo-600">${v.pp}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
